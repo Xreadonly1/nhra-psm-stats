@@ -144,6 +144,119 @@
   .q-best { background: #e8f5e9 !important; }
   .q-best td { background: #e8f5e9 !important; }
   .q-pos { font-weight: 700; color: #1a1a2e; }
+
+  /* ── Event Ladder (lane view) ── */
+  .ladder-round { margin-bottom: 28px; }
+  .lane-header-row {
+    display: flex; align-items: stretch; margin-bottom: 3px;
+    border-radius: 6px 6px 0 0; overflow: hidden;
+    box-shadow: 0 3px 12px rgba(0,0,0,.35);
+  }
+  .lane-col-head {
+    flex: 1; padding: 12px 16px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .lane-col-head.right-col-head { align-items: flex-end; }
+  .lane-head-label {
+    font-size: 14px; font-weight: 900; color: #f8fafc;
+    text-transform: uppercase; letter-spacing: .12em;
+  }
+  .lane-head-stats {
+    display: flex; align-items: baseline; gap: 6px; font-weight: 700;
+  }
+  .right-col-head .lane-head-stats { flex-direction: row-reverse; }
+  .lhs-wins   { font-size: 17px; font-weight: 900; color: #4ade80; }
+  .lhs-losses { font-size: 14px; font-weight: 700; color: #f87171; }
+  .lhs-pct    { font-size: 12px; font-weight: 600; color: #94a3b8; }
+  .lhs-sep    { font-size: 12px; color: #334155; }
+  .lane-head-bar-wrap {
+    width: 100%; height: 4px; background: rgba(255,255,255,.1);
+    border-radius: 2px; overflow: hidden; display: flex;
+  }
+  .right-col-head .lane-head-bar-wrap { justify-content: flex-end; }
+  .left-col-head  .lane-head-bar-fill { height: 4px; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 2px; }
+  .right-col-head .lane-head-bar-fill { height: 4px; background: linear-gradient(90deg, #fb923c, #f43f5e); border-radius: 2px; }
+  .lane-col-sep {
+    width: 60px; flex-shrink: 0; background: #020617;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  }
+  .lane-sep-round { font-size: 10px; font-weight: 900; color: #475569;
+    text-transform: uppercase; letter-spacing: .1em; text-align: center; line-height: 1.3; }
+  .lane-matchup-row {
+    display: flex; align-items: stretch; margin-bottom: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.07);
+  }
+  .lane-matchup-row:last-of-type { border-radius: 0 0 4px 4px; overflow: hidden; }
+  .lane-cell {
+    flex: 1; padding: 8px 14px;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .lane-cell-win  { background: #f0fdf4; }
+  .lane-cell-loss { background: #fff5f5; }
+  .lane-cell-none { background: #fff; }
+  .lane-vs {
+    width: 60px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; color: #cbd5e1; flex-shrink: 0;
+    background: #f8fafc; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;
+    letter-spacing: .06em;
+  }
+  .lane-rider-top { display: flex; align-items: center; gap: 7px; }
+  .lane-bnum {
+    font-weight: 700; font-size: 12px; color: #1a1a2e; white-space: nowrap;
+    font-family: "SF Mono","Consolas",monospace;
+  }
+  .lane-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .lane-q-seed {
+    font-size: 10px; font-weight: 700; background: #eff6ff; color: #3b82f6;
+    border-radius: 8px; padding: 1px 7px; white-space: nowrap; border: 1px solid #bfdbfe;
+  }
+  .lane-res { font-size: 11px; font-weight: 800; white-space: nowrap; margin-left: auto; }
+  .lane-res.win  { color: #16a34a; }
+  .lane-res.loss { color: #dc2626; }
+  .lane-rider-stats {
+    display: flex; gap: 12px;
+    font-family: "SF Mono","Consolas",monospace; font-size: 12px; padding-left: 2px;
+  }
+  .lane-et  { font-weight: 700; color: #1e293b; min-width: 50px; }
+  .lane-mph { color: #475569; min-width: 74px; }
+  .lane-rt  { color: #94a3b8; }
+  .lane-rt.rt-foul { color: #e74c3c; font-weight: 700; }
+  .lane-name-right { text-align: right; }
+  .lane-rider-stats-right { justify-content: flex-end; }
+  /* ── Overall lane stats (bottom) ── */
+  .lane-stats-section { margin-top: 32px; }
+  .lane-stats-title {
+    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .1em; color: #64748b; margin-bottom: 8px;
+  }
+  .lane-stats-row {
+    display: flex; align-items: stretch;
+  }
+  .lane-stat-spacer { width: 60px; flex-shrink: 0; }
+  .lane-stat-card {
+    flex: 1; padding: 18px 22px; text-align: center;
+    border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.28);
+  }
+  .lane-stat-card.lane-stat-left  { background: linear-gradient(135deg, #0f172a, #1e3a5f); }
+  .lane-stat-card.lane-stat-right { background: linear-gradient(135deg, #1c0a00, #3d1500); }
+  .lane-stat-label {
+    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .1em; margin-bottom: 8px;
+  }
+  .lane-stat-left  .lane-stat-label { color: #38bdf8; }
+  .lane-stat-right .lane-stat-label { color: #fb923c; }
+  .lane-stat-wl { font-size: 24px; font-weight: 900; color: #f8fafc; margin-bottom: 3px;
+    font-family: "SF Mono","Consolas",monospace; }
+  .lane-stat-pct { font-size: 13px; color: #94a3b8; margin-bottom: 8px; }
+  .lane-stat-avg {
+    font-size: 14px; font-weight: 700; color: #e2e8f0; margin-bottom: 12px;
+    font-family: "SF Mono","Consolas",monospace;
+  }
+  .lane-stat-avg-label { font-size: 10px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 2px; }
+  .lane-stat-bar-wrap { height: 5px; background: rgba(255,255,255,.1); border-radius: 3px; overflow: hidden; display: flex; }
+  .lane-stat-left  .lane-stat-bar { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 3px; }
+  .lane-stat-right .lane-stat-bar { height: 100%; background: linear-gradient(90deg, #fb923c, #f43f5e); border-radius: 3px; margin-left: auto; }
 </style>
 </head>
 <body>
@@ -177,6 +290,7 @@
 <div class="tabs">
   <div class="tab active" data-tab="results">Results</div>
   <div class="tab" data-tab="qualifying">Qualifying</div>
+  <div class="tab" data-tab="ladder">Event Ladder</div>
   <div class="tab" data-tab="progression">ET Progression</div>
   <div class="tab" data-tab="points">Season Points</div>
   <div class="tab" data-tab="yoy">Year-over-Year</div>
@@ -185,6 +299,7 @@
 <div class="content">
   <div id="tab-results"></div>
   <div id="tab-qualifying" style="display:none"></div>
+  <div id="tab-ladder" style="display:none"></div>
 
   <!-- ET Progression -->
   <div id="tab-progression" style="display:none">
@@ -194,6 +309,11 @@
         <button class="toggle-btn active" id="prog-et-btn"  onclick="setProgMode('et')">ET (seconds)</button>
         <button class="toggle-btn"        id="prog-mph-btn" onclick="setProgMode('mph')">MPH</button>
         <button class="toggle-btn"        id="prog-rt-btn"  onclick="setProgMode('rt')">Reaction Time</button>
+      </div>
+      <span class="label" id="prog-ylock-label">Y Scale:</span>
+      <div class="toggle-group" id="prog-ylock-group">
+        <button class="toggle-btn active" id="prog-ylock-auto" onclick="setProgYLock(false)">Auto</button>
+        <button class="toggle-btn"        id="prog-ylock-on"   onclick="setProgYLock(true)">Lock Scale</button>
       </div>
     </div>
     <div class="chart-wrap">
@@ -450,7 +570,7 @@ selEvent.addEventListener('change', renderActive);
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
 let activeTab = 'results';
-const TAB_IDS = ['results', 'qualifying', 'progression', 'points', 'yoy'];
+const TAB_IDS = ['results', 'qualifying', 'ladder', 'progression', 'points', 'yoy'];
 
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => {
@@ -475,6 +595,7 @@ document.querySelectorAll('.tab').forEach(t => {
 function renderActive() {
   if      (activeTab === 'results')     renderResults();
   else if (activeTab === 'qualifying')  renderQualifying();
+  else if (activeTab === 'ladder')      renderLadder();
   else if (activeTab === 'progression') renderProgressionChart();
   else if (activeTab === 'points')      renderPointsChart();
   else if (activeTab === 'yoy')         setYoYMode(yoyMode);
@@ -558,46 +679,25 @@ function renderQualifying() {
     return;
   }
 
-  const qLabels    = data.session_labels;   // ['Q1','Q2',...]
-  const eLabels    = data.elim_labels || []; // ['E1','E2','E3','Final']
-  const hasElim    = eLabels.length > 0;
+  const qLabels = data.session_labels;   // ['Q1','Q2',...]
 
   // Riders sorted by qualifying position (DNQs last)
   const ridersSorted = Object.entries(data.riders).sort((a, b) => a[1].q_pos - b[1].q_pos);
 
-  // Total column count for colspan on the cut-line row
-  // 3 fixed cols + per-Q (ET + MPH) + per-E (Lane + RT + ET)
-  const totalCols = 3 + qLabels.length * 2 + eLabels.length * 3;
+  // 3 fixed cols + per-Q (ET + MPH)
+  const totalCols = 3 + qLabels.length * 2;
 
   // ── Header ──────────────────────────────────────────────────────────────
   let html = eventInfo(eid) + '<div class="tbl-wrap"><table><thead><tr>';
   html += '<th class="num">Q Seed</th><th>#</th><th>Rider</th>';
-
-  // Qualifying session group headers
   qLabels.forEach(lbl => {
     html += '<th class="num" colspan="2">' + lbl + '</th>';
   });
-
-  // Elimination round group headers (with divider before first)
-  if (hasElim) {
-    eLabels.forEach((lbl, i) => {
-      const divider = i === 0 ? ' style="border-left:2px solid #aaa"' : '';
-      const dispLbl = lbl === 'Final' ? 'Final' : lbl === 'E3' ? 'Semis' : lbl === 'E2' ? 'Rd 2' : 'Rd 1';
-      html += '<th class="num" colspan="3"' + divider + '>' + dispLbl + '</th>';
-    });
-  }
-
   html += '</tr><tr>';
   html += '<th colspan="3"></th>';
   qLabels.forEach(() => {
     html += '<th class="num">ET</th><th class="num">MPH</th>';
   });
-  if (hasElim) {
-    eLabels.forEach((lbl, i) => {
-      const divider = i === 0 ? ' style="border-left:2px solid #aaa"' : '';
-      html += '<th class="num"' + divider + '>Lane</th><th class="num">RT</th><th class="num">ET</th>';
-    });
-  }
   html += '</tr></thead><tbody>';
 
   // ── Rows ────────────────────────────────────────────────────────────────
@@ -621,7 +721,6 @@ function renderQualifying() {
     html += '<td><strong>' + (rd.number || '?') + '</strong></td>';
     html += '<td>' + name + '</td>';
 
-    // Qualifying session columns (ET + MPH only; RT always null from qual page)
     rd.runs.forEach(run => {
       if (!run) {
         html += '<td class="num">—</td><td class="num">—</td>';
@@ -633,27 +732,6 @@ function renderQualifying() {
       html += '<td class="num' + etCls + '">' + (run.et  !== null ? fmtET(run.et)   : '—') + '</td>';
       html += '<td class="num">'               + (run.mph !== null ? fmtMPH(run.mph) : '—') + '</td>';
     });
-
-    // Elimination round columns (Lane + RT + ET)
-    if (hasElim) {
-      const elim = rd.elim || {};
-      eLabels.forEach((lbl, i) => {
-        const er = elim[lbl];
-        const divStyle = i === 0 ? ' style="border-left:2px solid #aaa"' : '';
-        if (!er) {
-          html += '<td class="num"' + divStyle + '>—</td><td class="num">—</td><td class="num">—</td>';
-          return;
-        }
-        const laneCls  = er.lane === 'LEFT' ? 'lane-left' : er.lane === 'RIGHT' ? 'lane-right' : '';
-        const laneAbbr = er.lane === 'LEFT' ? 'L' : er.lane === 'RIGHT' ? 'R' : '—';
-        const isW      = er.result === 'W';
-        const rowStyle = isW ? ' style="background:#f0fff0"' : '';
-        const etCls    = isW ? ' best-cell' : '';
-        html += '<td class="num"' + divStyle + '><span class="' + laneCls + '">' + laneAbbr + '</span></td>';
-        html += '<td class="num">' + (er.rt  !== null ? fmtRT(er.rt)   : '—') + '</td>';
-        html += '<td class="num' + etCls + '">' + (er.et !== null ? fmtET(er.et) : '—') + '</td>';
-      });
-    }
 
     html += '</tr>';
 
@@ -670,14 +748,200 @@ function renderQualifying() {
   el.innerHTML = html;
 }
 
+// ── Event Ladder Tab ──────────────────────────────────────────────────────────
+function renderLadder() {
+  const el  = document.getElementById('tab-ladder');
+  const eid = +selEvent.value;
+  if (!eid) { el.innerHTML = '<div class="no-data">Select an event above to view the event ladder.</div>'; return; }
+
+  const data = LADDER[eid];
+  if (!data || !Object.keys(data.rounds).length) {
+    el.innerHTML = eventInfo(eid) + '<div class="no-data">No elimination data for this event.</div>';
+    return;
+  }
+
+  const ROUND_DISPLAY = [
+    ['E1', 'Round 1'],
+    ['E2', 'Round 2'],
+    ['E3', 'Semifinals'],
+    ['Final', 'Final'],
+  ];
+
+  // Tally lane wins + collect ETs for overall stats
+  let lWins = 0, rWins = 0, total = 0;
+  const lETs = [], rETs = [];
+  ROUND_DISPLAY.forEach(function([key]) {
+    (data.rounds[key] || []).forEach(function(m) {
+      if (m.winner_lane) {
+        total++;
+        if (m.winner_lane === 'LEFT') lWins++;
+        else rWins++;
+      }
+      if (m.left.et  !== null && m.left.et  !== undefined) { const v = parseFloat(m.left.et);  if (v < 7.5) lETs.push(v); }
+      if (m.right.et !== null && m.right.et !== undefined) { const v = parseFloat(m.right.et); if (v < 7.5) rETs.push(v); }
+    });
+  });
+  const lAvgET = lETs.length > 0 ? lETs.reduce(function(a,b){return a+b;},0) / lETs.length : null;
+  const rAvgET = rETs.length > 0 ? rETs.reduce(function(a,b){return a+b;},0) / rETs.length : null;
+
+  const lPct = total > 0 ? Math.round((lWins / total) * 100) : null;
+  const rPct = total > 0 ? Math.round((rWins / total) * 100) : null;
+
+  const SHORT_LABEL = { 'Round 1': 'Rd 1', 'Round 2': 'Rd 2', 'Semifinals': 'Semis', 'Final': 'Final' };
+
+  let html = eventInfo(eid);
+
+  ROUND_DISPLAY.forEach(function([key, dispLabel]) {
+    const matchups = data.rounds[key];
+    if (!matchups || !matchups.length) return;
+
+    // Per-round lane stats
+    let rdL = 0, rdR = 0, rdN = 0;
+    matchups.forEach(function(m) {
+      if (m.winner_lane) { rdN++; if (m.winner_lane === 'LEFT') rdL++; else rdR++; }
+    });
+    const rdLPct = rdN > 0 ? Math.round((rdL / rdN) * 100) : null;
+    const rdRPct = rdN > 0 ? Math.round((rdR / rdN) * 100) : null;
+
+    html += '<div class="ladder-round">';
+
+    // Header bar: stats embedded in each lane column, round label in the separator
+    html += '<div class="lane-header-row">' +
+      '<div class="lane-col-head left-col-head">' +
+        '<div class="lane-head-label">&#9664; Left Lane</div>' +
+        '<div class="lane-head-stats">' +
+          '<span class="lhs-wins">' + rdL + 'W</span><span class="lhs-sep">·</span>' +
+          '<span class="lhs-losses">' + (rdN - rdL) + 'L</span><span class="lhs-sep">·</span>' +
+          '<span class="lhs-pct">' + (rdLPct !== null ? rdLPct + '%' : '—') + ' win</span>' +
+        '</div>' +
+        '<div class="lane-head-bar-wrap"><div class="lane-head-bar-fill" style="width:' + (rdLPct || 0) + '%"></div></div>' +
+      '</div>' +
+      '<div class="lane-col-sep"><span class="lane-sep-round">' + SHORT_LABEL[dispLabel] + '</span></div>' +
+      '<div class="lane-col-head right-col-head">' +
+        '<div class="lane-head-label">Right Lane &#9654;</div>' +
+        '<div class="lane-head-stats">' +
+          '<span class="lhs-wins">' + rdR + 'W</span><span class="lhs-sep">·</span>' +
+          '<span class="lhs-losses">' + (rdN - rdR) + 'L</span><span class="lhs-sep">·</span>' +
+          '<span class="lhs-pct">' + (rdRPct !== null ? rdRPct + '%' : '—') + ' win</span>' +
+        '</div>' +
+        '<div class="lane-head-bar-wrap"><div class="lane-head-bar-fill" style="width:' + (rdRPct || 0) + '%"></div></div>' +
+      '</div>' +
+    '</div>';
+
+    matchups.forEach(function(m) {
+      const leftWon  = m.winner_lane === 'LEFT';
+      const rightWon = m.winner_lane === 'RIGHT';
+      const noResult = !m.winner_lane;
+      html += '<div class="lane-matchup-row">' +
+        laneCell(m.left,  leftWon,  noResult, 'left') +
+        '<div class="lane-vs">VS</div>' +
+        laneCell(m.right, rightWon, noResult, 'right') +
+        '</div>';
+    });
+
+    html += '</div>';
+  });
+
+  // Overall lane stats at the bottom — two separate boxes aligned to lane columns
+  html += '<div class="lane-stats-section">' +
+    '<div class="lane-stats-title">Overall Lane Statistics &mdash; ' + total + ' races</div>' +
+    '<div class="lane-stats-row">' +
+    laneStatCard('Left Lane',  lWins, total - lWins, lPct, 'left',  lAvgET) +
+    '<div class="lane-stat-spacer"></div>' +
+    laneStatCard('Right Lane', rWins, total - rWins, rPct, 'right', rAvgET) +
+    '</div></div>';
+
+  el.innerHTML = html;
+}
+
+function laneCell(rider, won, noResult, side) {
+  const cls    = won ? ' lane-cell-win' : (noResult ? ' lane-cell-none' : ' lane-cell-loss');
+  const resCls = won ? ' win' : (noResult ? '' : ' loss');
+  const resLbl = won ? '&#10004;&nbsp;W' : (noResult ? '' : '&#10008;&nbsp;L');
+  const qHtml  = (rider.q_pos !== null && rider.q_pos !== undefined)
+    ? '<span class="lane-q-seed">Q' + rider.q_pos + '</span>' : '';
+  const rtVal  = (rider.rt !== null && rider.rt !== undefined) ? fmtRT(rider.rt) : '—';
+  const rtCls  = (rider.rt !== null && rider.rt !== undefined && parseFloat(rider.rt) < 0)
+    ? ' rt-foul' : '';
+  const etStr  = rider.et  !== null && rider.et  !== undefined ? fmtET(rider.et)   : '—';
+  const mphStr = rider.mph !== null && rider.mph !== undefined ? fmtMPH(rider.mph) : '—';
+
+  if (side === 'right') {
+    // Mirrored: W/L + Q seed on left, name + # pushed right, stats right-justified
+    return '<div class="lane-cell' + cls + '">' +
+      '<div class="lane-rider-top">' +
+        '<span class="lane-res' + resCls + '">' + resLbl + '</span>' +
+        qHtml +
+        '<span class="lane-name lane-name-right">' + rider.name + '</span>' +
+        '<span class="lane-bnum">#' + (rider.number || '?') + '</span>' +
+      '</div>' +
+      '<div class="lane-rider-stats lane-rider-stats-right">' +
+        '<span class="lane-et">'  + etStr  + '</span>' +
+        '<span class="lane-mph">' + mphStr + ' mph</span>' +
+        '<span class="lane-rt' + rtCls + '">RT ' + rtVal + '</span>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // Left lane (default)
+  return '<div class="lane-cell' + cls + '">' +
+    '<div class="lane-rider-top">' +
+      '<span class="lane-bnum">#' + (rider.number || '?') + '</span>' +
+      '<span class="lane-name">' + rider.name + '</span>' +
+      qHtml +
+      '<span class="lane-res' + resCls + '">' + resLbl + '</span>' +
+    '</div>' +
+    '<div class="lane-rider-stats">' +
+      '<span class="lane-et">'  + etStr  + '</span>' +
+      '<span class="lane-mph">' + mphStr + ' mph</span>' +
+      '<span class="lane-rt' + rtCls + '">RT ' + rtVal + '</span>' +
+    '</div>' +
+  '</div>';
+}
+
+function laneStatCard(label, wins, losses, pct, side, avgET) {
+  const pctStr   = pct !== null ? pct + '%' : '—';
+  const barWidth = pct !== null ? pct : 0;
+  const avgHtml  = avgET !== null
+    ? '<div class="lane-stat-avg"><span class="lane-stat-avg-label">Avg ET (under 7.5s)</span>' + fmtET(avgET) + '</div>'
+    : '';
+  return '<div class="lane-stat-card lane-stat-' + side + '">' +
+    '<div class="lane-stat-label">' + label + '</div>' +
+    '<div class="lane-stat-wl">' + wins + 'W &nbsp; ' + losses + 'L</div>' +
+    '<div class="lane-stat-pct">' + pctStr + ' win rate</div>' +
+    avgHtml +
+    '<div class="lane-stat-bar-wrap"><div class="lane-stat-bar" style="width:' + barWidth + '%"></div></div>' +
+  '</div>';
+}
+
 // ── ET Progression Chart ──────────────────────────────────────────────────────
-let progMode = 'et';
+let progMode    = 'et';
+let progYLocked = false;
 
 function setProgMode(mode) {
   progMode = mode;
   document.getElementById('prog-et-btn').classList.toggle('active',  mode === 'et');
   document.getElementById('prog-mph-btn').classList.toggle('active', mode === 'mph');
   document.getElementById('prog-rt-btn').classList.toggle('active',  mode === 'rt');
+  // Show Y-lock for ET and MPH; hide for RT
+  const showLock = mode === 'et' || mode === 'mph';
+  document.getElementById('prog-ylock-label').style.display = showLock ? '' : 'none';
+  document.getElementById('prog-ylock-group').style.display = showLock ? '' : 'none';
+  if (showLock) {
+    document.getElementById('prog-ylock-on').textContent =
+      mode === 'et' ? 'Lock 6.6 – 7.2s' : 'Lock 190 – 205';
+  }
+  // Reset lock when switching modes
+  progYLocked = false;
+  document.getElementById('prog-ylock-auto').classList.add('active');
+  document.getElementById('prog-ylock-on').classList.remove('active');
+  renderProgressionChart();
+}
+
+function setProgYLock(locked) {
+  progYLocked = locked;
+  document.getElementById('prog-ylock-auto').classList.toggle('active', !locked);
+  document.getElementById('prog-ylock-on').classList.toggle('active',    locked);
   renderProgressionChart();
 }
 
@@ -745,11 +1009,12 @@ function renderProgressionChart() {
       categoryorder: 'array',
       categoryarray: displaySessions,
     },
-    yaxis: {
-      title: yTitle,
-      autorange: isET || isRT ? 'reversed' : true,
-      tickformat: isET || isRT ? '.4f' : '.2f',
-    },
+    yaxis: Object.assign(
+      { title: yTitle, tickformat: isET || isRT ? '.4f' : '.2f' },
+      (isET  && progYLocked) ? { autorange: false, range: [7.2, 6.6] } :
+      (isMPH && progYLocked) ? { autorange: false, range: [190, 205] } :
+      { autorange: isET || isRT ? 'reversed' : true }
+    ),
     legend: {
       x: 1.02, y: 1, xanchor: 'left', yanchor: 'top',
       bgcolor: 'rgba(255,255,255,0.85)', bordercolor: '#ddd', borderwidth: 1,
