@@ -257,6 +257,55 @@
   .lane-stat-bar-wrap { height: 5px; background: rgba(255,255,255,.1); border-radius: 3px; overflow: hidden; display: flex; }
   .lane-stat-left  .lane-stat-bar { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 3px; }
   .lane-stat-right .lane-stat-bar { height: 100%; background: linear-gradient(90deg, #fb923c, #f43f5e); border-radius: 3px; margin-left: auto; }
+
+  /* ── Mobile ── */
+  @media (max-width: 640px) {
+    /* Header: shrink logo and keep it inline */
+    header { padding: 8px 12px; gap: 10px; }
+    header h1 { font-size: 15px; white-space: normal; }
+    .logo-wrap { position: static; margin-left: auto; padding: 4px; flex-shrink: 0; }
+    .logo-wrap img { height: 48px; }
+
+    /* Controls */
+    .controls { padding: 10px 12px; gap: 10px; }
+    .ctrl-group { width: 100%; }
+    select { min-width: 0; width: 100%; font-size: 16px; /* prevent iOS zoom */ }
+
+    /* Tabs: horizontally scrollable */
+    .tabs { padding: 0; overflow-x: auto; -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { padding: 10px 13px; font-size: 12px; }
+
+    /* Content */
+    .content { padding: 12px 10px; }
+
+    /* Tables */
+    th { padding: 7px 8px; font-size: 11px; }
+    td { padding: 6px 8px; font-size: 12px; }
+    td.num { font-size: 12px; }
+
+    /* Charts: shorter on phone */
+    #progression-chart, #points-chart { height: 320px; }
+    #yoy-chart { height: 280px; }
+
+    /* Event Ladder: narrower separator and cells */
+    .lane-col-sep, .lane-stat-spacer { width: 34px; }
+    .lane-vs { width: 34px; font-size: 9px; }
+    .lane-cell { padding: 6px 8px; }
+    .lane-col-head { padding: 8px 10px; }
+    .lane-head-label { font-size: 12px; letter-spacing: .06em; }
+    .lane-name { font-size: 12px; }
+    .lane-bnum { font-size: 11px; }
+    .lane-rider-stats { gap: 6px; font-size: 11px; }
+    .lane-et { min-width: 40px; }
+    .lane-mph { min-width: 58px; }
+    .lane-stat-card { padding: 12px 14px; }
+    .lane-stat-wl { font-size: 19px; }
+
+    /* Style panel */
+    .style-name { min-width: 0; flex: 1; }
+  }
 </style>
 </head>
 <body>
