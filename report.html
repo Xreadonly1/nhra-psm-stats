@@ -214,16 +214,34 @@
   .lane-res { font-size: 11px; font-weight: 800; white-space: nowrap; margin-left: auto; }
   .lane-res.win  { color: #16a34a; }
   .lane-res.loss { color: #dc2626; }
-  .lane-rider-stats {
-    display: flex; gap: 12px;
-    font-family: "SF Mono","Consolas",monospace; font-size: 12px; padding-left: 2px;
+  .lane-main-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px 4px;
+    font-family: "SF Mono","Consolas",monospace; font-size: 12px; margin-top: 3px;
   }
-  .lane-et  { font-weight: 700; color: #1e293b; min-width: 50px; }
-  .lane-mph { color: #475569; min-width: 74px; }
-  .lane-rt  { color: #94a3b8; }
+  .lane-main-hdr {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; color: #64748b; text-align: center;
+  }
+  .lane-et  { font-weight: 700; color: #1e293b; text-align: center; }
+  .lane-mph { color: #475569; text-align: center; }
+  .lane-rt  { color: #94a3b8; text-align: center; }
   .lane-rt.rt-foul { color: #e74c3c; font-weight: 700; }
   .lane-name-right { text-align: right; }
-  .lane-rider-stats-right { justify-content: flex-end; }
+  .lane-splits-wrap {
+    margin-top: 6px; padding-top: 5px;
+    border-top: 1px solid rgba(148,163,184,.25);
+  }
+  .lane-splits-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px 4px;
+  }
+  .lane-splits-hdr {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; color: #64748b; text-align: center;
+  }
+  .lane-splits-val {
+    font-family: "SF Mono","Consolas",monospace; font-size: 11px;
+    color: #94a3b8; text-align: center;
+  }
   /* ── Overall lane stats (bottom) ── */
   .lane-stats-section { margin-top: 32px; }
   .lane-stats-title {
@@ -297,9 +315,10 @@
     .lane-head-label { font-size: 12px; letter-spacing: .06em; }
     .lane-name { font-size: 12px; }
     .lane-bnum { font-size: 11px; }
-    .lane-rider-stats { gap: 6px; font-size: 11px; }
-    .lane-et { min-width: 40px; }
-    .lane-mph { min-width: 58px; }
+    .lane-main-grid { font-size: 11px; }
+    .lane-main-hdr  { font-size: 8px; }
+    .lane-splits-hdr { font-size: 8px; }
+    .lane-splits-val  { font-size: 10px; }
     .lane-stat-card { padding: 12px 14px; }
     .lane-stat-wl { font-size: 19px; }
 
@@ -915,8 +934,41 @@ function laneCell(rider, won, noResult, side) {
   const etStr  = rider.et  !== null && rider.et  !== undefined ? fmtET(rider.et)   : '—';
   const mphStr = rider.mph !== null && rider.mph !== undefined ? fmtMPH(rider.mph) : '—';
 
+  const hasSplits = (rider.et_60 != null || rider.et_330 != null || rider.et_660 != null || rider.et_1000 != null);
+  let splitsHtml = '';
+  if (hasSplits) {
+    const s60   = rider.et_60   != null ? fmtET(rider.et_60)    : '—';
+    const s330  = rider.et_330  != null ? fmtET(rider.et_330)   : '—';
+    const s660  = rider.et_660  != null ? fmtET(rider.et_660)   : '—';
+    const m660  = rider.mph_660 != null ? fmtMPH(rider.mph_660) : '—';
+    const s1000 = rider.et_1000 != null ? fmtET(rider.et_1000)  : '—';
+    splitsHtml = '<div class="lane-splits-wrap">' +
+      '<div class="lane-splits-grid">' +
+        '<span class="lane-splits-hdr">60 ft</span>'   +
+        '<span class="lane-splits-hdr">330 ft</span>'  +
+        '<span class="lane-splits-hdr">660 ft</span>'  +
+        '<span class="lane-splits-hdr">660 mph</span>' +
+        '<span class="lane-splits-hdr">1000 ft</span>' +
+        '<span class="lane-splits-val">' + s60   + '</span>' +
+        '<span class="lane-splits-val">' + s330  + '</span>' +
+        '<span class="lane-splits-val">' + s660  + '</span>' +
+        '<span class="lane-splits-val">' + m660  + '</span>' +
+        '<span class="lane-splits-val">' + s1000 + '</span>' +
+      '</div>' +
+    '</div>';
+  }
+
+  const mainGrid =
+    '<div class="lane-main-grid">' +
+      '<span class="lane-main-hdr">ET</span>'  +
+      '<span class="lane-main-hdr">MPH</span>' +
+      '<span class="lane-main-hdr">RT</span>'  +
+      '<span class="lane-et">'               + etStr  + '</span>' +
+      '<span class="lane-mph">'              + mphStr + '</span>' +
+      '<span class="lane-rt' + rtCls + '">' + rtVal  + '</span>' +
+    '</div>';
+
   if (side === 'right') {
-    // Mirrored: W/L + Q seed on left, name + # pushed right, stats right-justified
     return '<div class="lane-cell' + cls + '">' +
       '<div class="lane-rider-top">' +
         '<span class="lane-res' + resCls + '">' + resLbl + '</span>' +
@@ -924,11 +976,8 @@ function laneCell(rider, won, noResult, side) {
         '<span class="lane-name lane-name-right">' + rider.name + '</span>' +
         '<span class="lane-bnum">#' + (rider.number || '?') + '</span>' +
       '</div>' +
-      '<div class="lane-rider-stats lane-rider-stats-right">' +
-        '<span class="lane-et">'  + etStr  + '</span>' +
-        '<span class="lane-mph">' + mphStr + ' mph</span>' +
-        '<span class="lane-rt' + rtCls + '">RT ' + rtVal + '</span>' +
-      '</div>' +
+      mainGrid +
+      splitsHtml +
     '</div>';
   }
 
@@ -940,11 +989,8 @@ function laneCell(rider, won, noResult, side) {
       qHtml +
       '<span class="lane-res' + resCls + '">' + resLbl + '</span>' +
     '</div>' +
-    '<div class="lane-rider-stats">' +
-      '<span class="lane-et">'  + etStr  + '</span>' +
-      '<span class="lane-mph">' + mphStr + ' mph</span>' +
-      '<span class="lane-rt' + rtCls + '">RT ' + rtVal + '</span>' +
-    '</div>' +
+    mainGrid +
+    splitsHtml +
   '</div>';
 }
 
@@ -1060,9 +1106,9 @@ function renderProgressionChart() {
     },
     yaxis: Object.assign(
       { title: yTitle, tickformat: isET || isRT ? '.4f' : '.2f' },
-      (isET  && progYLocked) ? { autorange: false, range: [7.2, 6.6] } :
+      (isET  && progYLocked) ? { autorange: false, range: [6.6, 7.2] } :
       (isMPH && progYLocked) ? { autorange: false, range: [190, 205] } :
-      { autorange: isET || isRT ? 'reversed' : true }
+      { autorange: isRT ? 'reversed' : true }
     ),
     legend: {
       x: 1.02, y: 1, xanchor: 'left', yanchor: 'top',
