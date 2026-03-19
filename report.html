@@ -394,6 +394,7 @@
         <button class="toggle-btn active" id="prog-et-btn"  onclick="setProgMode('et')">ET (seconds)</button>
         <button class="toggle-btn"        id="prog-mph-btn" onclick="setProgMode('mph')">MPH</button>
         <button class="toggle-btn"        id="prog-rt-btn"  onclick="setProgMode('rt')">Reaction Time</button>
+        <button class="toggle-btn"        id="prog-60-btn"  onclick="setProgMode('60ft')">60 ft</button>
       </div>
       <span class="label" id="prog-ylock-label">Y Scale:</span>
       <div class="toggle-group" id="prog-ylock-group">
@@ -1033,13 +1034,16 @@ function setProgMode(mode) {
   document.getElementById('prog-et-btn').classList.toggle('active',  mode === 'et');
   document.getElementById('prog-mph-btn').classList.toggle('active', mode === 'mph');
   document.getElementById('prog-rt-btn').classList.toggle('active',  mode === 'rt');
-  // Show Y-lock for ET and MPH; hide for RT
-  const showLock = mode === 'et' || mode === 'mph';
+  document.getElementById('prog-60-btn').classList.toggle('active',  mode === '60ft');
+  // Show Y-lock for ET, MPH, and 60ft; hide for RT
+  const showLock = mode === 'et' || mode === 'mph' || mode === '60ft';
   document.getElementById('prog-ylock-label').style.display = showLock ? '' : 'none';
   document.getElementById('prog-ylock-group').style.display = showLock ? '' : 'none';
   if (showLock) {
     document.getElementById('prog-ylock-on').textContent =
-      mode === 'et' ? 'Lock 6.6 – 7.2s' : 'Lock 190 – 205';
+      mode === 'et' ? 'Lock 6.6 – 7.2s' :
+      mode === '60ft' ? 'Lock 1.020 – 1.200s' :
+      'Lock 190 – 205';
   }
   // Reset lock when switching modes
   progYLocked = false;
@@ -1080,6 +1084,7 @@ function renderProgressionChart() {
   const isET  = progMode === 'et';
   const isMPH = progMode === 'mph';
   const isRT  = progMode === 'rt';
+  const is60  = progMode === '60ft';
 
   // Map internal session labels (E1/E2/E3) to NHRA round names for display
   const displaySessions = data.sessions.map(dispSession);
@@ -1087,12 +1092,12 @@ function renderProgressionChart() {
   const traces = allNames.map(name => {
     const rd = data.riders[name];
     const st = progStyles[name];
-    const yVals = isET ? rd.ets : isMPH ? rd.mphs : rd.rts;
+    const yVals = isET ? rd.ets : isMPH ? rd.mphs : isRT ? rd.rts : rd.et60s;
     const textVals = yVals.map((v, i) => {
       if (v === null || v === undefined) return 'DNS';
       const res = rd.results[i];
       const suffix = res ? ' (' + res + ')' : '';
-      return (isET || isRT ? parseFloat(v).toFixed(4) : parseFloat(v).toFixed(2)) + suffix;
+      return (isMPH ? parseFloat(v).toFixed(2) : parseFloat(v).toFixed(4)) + suffix;
     });
 
     return {
@@ -1103,13 +1108,13 @@ function renderProgressionChart() {
       marker: { size: 10, symbol: st.symbol, color: st.color },
       line:   { color: st.color, width: 2.5, dash: st.dash },
       text: textVals,
-      hovertemplate: '<b>%{fullData.name}</b><br>' + (isET ? 'ET: %{text} s' : isMPH ? 'MPH: %{text}' : 'RT: %{text} s') + '<extra></extra>',
+      hovertemplate: '<b>%{fullData.name}</b><br>' + (isET ? 'ET: %{text} s' : isMPH ? 'MPH: %{text}' : isRT ? 'RT: %{text} s' : '60 ft: %{text} s') + '<extra></extra>',
       connectgaps: false,
     };
   });
 
   const evName = ev ? (ev.year + ' ' + ev.name) : '';
-  const yTitle = isET ? 'Elapsed Time (seconds)' : isMPH ? 'Speed (MPH)' : 'Reaction Time (seconds)';
+  const yTitle = isET ? 'Elapsed Time (seconds)' : isMPH ? 'Speed (MPH)' : isRT ? 'Reaction Time (seconds)' : '60 ft Split (seconds)';
 
   const layout = {
     title: { text: evName + ' — ET Progression', font: { size: 16 } },
@@ -1120,9 +1125,10 @@ function renderProgressionChart() {
       categoryarray: displaySessions,
     },
     yaxis: Object.assign(
-      { title: yTitle, tickformat: isET || isRT ? '.4f' : '.2f' },
+      { title: yTitle, tickformat: isMPH ? '.2f' : '.4f' },
       (isET  && progYLocked) ? { autorange: false, range: [6.6, 7.2] } :
       (isMPH && progYLocked) ? { autorange: false, range: [190, 205] } :
+      (is60  && progYLocked) ? { autorange: false, range: [1.020, 1.200] } :
       { autorange: isRT ? 'reversed' : true }
     ),
     legend: {
