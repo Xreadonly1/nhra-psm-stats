@@ -141,9 +141,42 @@
   #yoy-chart { width: 100%; height: 520px; }
 
   /* ── Qualifying table ── */
-  .q-best { background: #e8f5e9 !important; }
-  .q-best td { background: #e8f5e9 !important; }
   .q-pos { font-weight: 700; color: #1a1a2e; }
+  table.q-table { width: auto; }
+  .q-table td.q-card-cell { padding: 3px 4px; vertical-align: top; }
+  .q-rider-name { white-space: nowrap; font-size: 13px; }
+  .q-session-hdr { text-align: center !important; min-width: 108px; }
+  .q-card {
+    background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 5px;
+    padding: 5px 7px; font-family: "SF Mono","Consolas",monospace; font-size: 11px;
+  }
+  .q-card-best { background: #e8f5e9; border-color: #a5d6a7; }
+  .q-card-empty { text-align: center; color: #bbb; padding: 10px 0; font-family: inherit; }
+  .q-card-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 3px; padding-bottom: 3px; border-bottom: 1px solid rgba(0,0,0,.08);
+  }
+  .q-card-lane {
+    font-size: 10px; font-weight: 800; padding: 1px 5px; border-radius: 3px; letter-spacing: .04em;
+  }
+  .q-lane-left  { background: #dbeafe; color: #1d4ed8; }
+  .q-lane-right { background: #fee2e2; color: #b91c1c; }
+  .q-card-rt { color: #64748b; font-size: 10px; }
+  .q-card-rt-foul { color: #e74c3c; font-weight: 700; }
+  .q-card-splits { display: flex; flex-wrap: wrap; gap: 0 5px; margin-bottom: 3px; }
+  .q-spl { display: flex; flex-direction: column; align-items: center; flex: 1 0 28px; }
+  .q-spl-hdr {
+    font-size: 8px; font-weight: 700; text-transform: uppercase;
+    color: #94a3b8; letter-spacing: .03em; line-height: 1.2;
+  }
+  .q-card-result {
+    display: flex; align-items: baseline; gap: 4px;
+    padding-top: 2px; border-top: 1px solid rgba(0,0,0,.08);
+  }
+  .q-card-et  { font-size: 13px; font-weight: 700; color: #1e293b; }
+  .q-card-sep { color: #94a3b8; font-size: 11px; }
+  .q-card-mph { font-size: 11px; color: #475569; }
+  .q-card-result-best .q-card-et { color: #16a34a; font-size: 14px; }
 
   /* ── Event Ladder (lane view) ── */
   .ladder-round { margin-bottom: 28px; }
@@ -375,8 +408,8 @@
 <div class="tabs">
   <div class="tab active" data-tab="results">Results</div>
   <div class="tab" data-tab="qualifying">Qualifying</div>
-  <div class="tab" data-tab="ladder">Event Ladder</div>
-  <div class="tab" data-tab="progression">ET Progression</div>
+  <div class="tab" data-tab="ladder">Eliminations Ladder</div>
+  <div class="tab" data-tab="progression">Event Progression</div>
   <div class="tab" data-tab="points">Season Points</div>
   <div class="tab" data-tab="yoy">Year-over-Year</div>
 </div>
@@ -404,7 +437,7 @@
     </div>
     <div class="chart-wrap">
       <div id="progression-chart"></div>
-      <p class="chart-note">ET Progression: lower ET = faster. Best Q = best qualifying time (Fri/Sat); Rd 1 → Final = Sunday elimination rounds. Top 16 qualifiers make the field.</p>
+      <p class="chart-note">Event Progression: lower ET = faster. Q1–Q4 = qualifying sessions (Fri/Sat); Rd 1 → Final = Sunday elimination rounds. Top 16 qualifiers make the field.</p>
     </div>
     <div id="progression-style-panel"></div>
   </div>
@@ -498,7 +531,8 @@ function roundBadge(label, result) {
 
 // Map session labels for chart display
 const DISP_SESSION = {
-  'Q1': 'Best Q', 'E1': 'Rd 1', 'E2': 'Rd 2', 'E3': 'Semis', 'Final': 'Final'
+  'Q1': 'Q1', 'Q2': 'Q2', 'Q3': 'Q3', 'Q4': 'Q4',
+  'E1': 'Rd 1', 'E2': 'Rd 2', 'E3': 'Semi', 'Final': 'Final'
 };
 function dispSession(lbl) { return DISP_SESSION[lbl] || lbl; }
 
@@ -770,19 +804,18 @@ function renderQualifying() {
   // Riders sorted by qualifying position (DNQs last)
   const ridersSorted = Object.entries(data.riders).sort((a, b) => a[1].q_pos - b[1].q_pos);
 
-  // 3 fixed cols + per-Q (ET + MPH)
-  const totalCols = 3 + qLabels.length * 2;
+  // Detect split data availability
+  const hasSplitData = Object.values(data.riders).some(rd =>
+    rd.runs.some(run => run && (run.et_60 != null || run.rt != null))
+  );
+
+  const totalCols = 3 + qLabels.length;
 
   // ── Header ──────────────────────────────────────────────────────────────
-  let html = eventInfo(eid) + '<div class="tbl-wrap"><table><thead><tr>';
-  html += '<th class="num">Q Seed</th><th>#</th><th>Rider</th>';
+  let html = eventInfo(eid) + '<div class="tbl-wrap"><table class="q-table"><thead><tr>';
+  html += '<th class="num">Seed</th><th>#</th><th>Rider</th>';
   qLabels.forEach(lbl => {
-    html += '<th class="num" colspan="2">' + lbl + '</th>';
-  });
-  html += '</tr><tr>';
-  html += '<th colspan="3"></th>';
-  qLabels.forEach(() => {
-    html += '<th class="num">ET</th><th class="num">MPH</th>';
+    html += '<th class="q-session-hdr">' + lbl + '</th>';
   });
   html += '</tr></thead><tbody>';
 
@@ -791,7 +824,7 @@ function renderQualifying() {
     const qualified = rd.q_pos < 999 && rd.q_pos <= 16;
     const qSeed     = rd.q_pos < 999 ? rd.q_pos : null;
 
-    // Best ET across all Q sessions (for green highlight)
+    // Best ET across all Q sessions
     const bestQET = rd.runs.reduce((best, run) => {
       if (run && run.et !== null && run.et !== undefined) {
         const v = parseFloat(run.et);
@@ -805,18 +838,53 @@ function renderQualifying() {
             '<span class="qual-badge ' + (qualified ? 'qual-q' : 'qual-dnq') + '">' +
             (qualified ? 'Q' : 'DNQ') + '</span></td>';
     html += '<td><strong>' + (rd.number || '?') + '</strong></td>';
-    html += '<td>' + name + '</td>';
+    html += '<td class="q-rider-name">' + name + '</td>';
 
     rd.runs.forEach(run => {
       if (!run) {
-        html += '<td class="num">—</td><td class="num">—</td>';
+        html += '<td class="q-card-cell"><div class="q-card q-card-empty">—</div></td>';
         return;
       }
       const isBest = bestQET !== null && run.et !== null &&
                      Math.abs(parseFloat(run.et) - bestQET) < 0.00001;
-      const etCls = isBest ? ' best-cell' : '';
-      html += '<td class="num' + etCls + '">' + (run.et  !== null ? fmtET(run.et)   : '—') + '</td>';
-      html += '<td class="num">'               + (run.mph !== null ? fmtMPH(run.mph) : '—') + '</td>';
+
+      html += '<td class="q-card-cell"><div class="q-card' + (isBest ? ' q-card-best' : '') + '">';
+
+      if (hasSplitData) {
+        // Lane badge + RT row
+        const laneShort = run.lane === 'LEFT' ? 'L' : run.lane === 'RIGHT' ? 'R' : (run.lane || '');
+        const laneCls   = run.lane === 'LEFT' ? 'q-lane-left' : run.lane === 'RIGHT' ? 'q-lane-right' : '';
+        const rtStr     = run.rt != null ? fmtRT(run.rt) : '—';
+        const rtFoul    = run.rt != null && parseFloat(run.rt) < 0;
+        html += '<div class="q-card-top">' +
+          (laneShort ? '<span class="q-card-lane ' + laneCls + '">' + laneShort + '</span>' : '') +
+          '<span class="q-card-rt' + (rtFoul ? ' q-card-rt-foul' : '') + '">rt ' + rtStr + '</span>' +
+        '</div>';
+
+        // Split times
+        const s60   = run.et_60   != null ? fmtET(run.et_60)    : '—';
+        const s330  = run.et_330  != null ? fmtET(run.et_330)   : '—';
+        const s660  = run.et_660  != null ? fmtET(run.et_660)   : '—';
+        const m660  = run.mph_660 != null ? fmtMPH(run.mph_660) : '—';
+        const s1000 = run.et_1000 != null ? fmtET(run.et_1000)  : '—';
+        const spl = (hdr, val) =>
+          '<span class="q-spl"><span class="q-spl-hdr">' + hdr + '</span>' + val + '</span>';
+        html += '<div class="q-card-splits">' +
+          spl('60', s60) + spl('330', s330) + spl('660', s660) +
+          spl('mph', m660) + spl('1k', s1000) +
+        '</div>';
+      }
+
+      // ET · MPH  (always shown, ET bold if best run)
+      const etStr  = run.et  !== null ? fmtET(run.et)   : '—';
+      const mphStr = run.mph !== null ? fmtMPH(run.mph) : '—';
+      html += '<div class="q-card-result' + (isBest ? ' q-card-result-best' : '') + '">' +
+        '<span class="q-card-et">' + etStr + '</span>' +
+        '<span class="q-card-sep">·</span>' +
+        '<span class="q-card-mph">' + mphStr + '</span>' +
+      '</div>';
+
+      html += '</div></td>';
     });
 
     html += '</tr>';
