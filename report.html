@@ -375,6 +375,29 @@
     /* Style panel */
     .style-name { min-width: 0; flex: 1; }
   }
+
+  /* ── Rankings Tab ── */
+  .rnk-controls {
+    display: flex; align-items: center; gap: 14px; padding: 10px 0 14px;
+  }
+  .rnk-window-label { font-size: 13px; font-weight: 600; color: #475569; }
+  .rnk-table { width: 100%; }
+  .rnk-bar-wrap {
+    width: 80px; height: 5px; background: #e2e8f0; border-radius: 3px;
+    overflow: hidden; display: inline-block; vertical-align: middle; margin-left: 6px;
+  }
+  .rnk-bar { height: 5px; border-radius: 3px; }
+  .elo-bar  { background: linear-gradient(90deg, #38bdf8, #818cf8); }
+  .perf-bar { background: linear-gradient(90deg, #4ade80, #22d3ee); }
+  .rnk-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    font-size: 12px; font-weight: 800; color: #fff;
+  }
+  .rnk-badge-gold   { background: #f59e0b; }
+  .rnk-badge-silver { background: #94a3b8; }
+  .rnk-badge-bronze { background: #b45309; }
+  .rnk-win-pct { font-variant-numeric: tabular-nums; letter-spacing: .02em; }
 </style>
 </head>
 <body>
@@ -412,6 +435,7 @@
   <div class="tab" data-tab="progression">Event Progression</div>
   <div class="tab" data-tab="points">Season Points</div>
   <div class="tab" data-tab="yoy">Year-over-Year</div>
+  <div class="tab" data-tab="rankings">Rankings</div>
 </div>
 
 <div class="content">
@@ -475,6 +499,9 @@
       <div id="yoy-chart-style-panel"></div>
     </div>
   </div>
+
+  <!-- Rankings -->
+  <div id="tab-rankings" style="display:none"></div>
 </div>
 
 <script>
@@ -690,7 +717,7 @@ selEvent.addEventListener('change', renderActive);
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
 let activeTab = 'results';
-const TAB_IDS = ['results', 'qualifying', 'ladder', 'progression', 'points', 'yoy'];
+const TAB_IDS = ['results', 'qualifying', 'ladder', 'progression', 'points', 'yoy', 'rankings'];
 
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => {
@@ -703,9 +730,10 @@ document.querySelectorAll('.tab').forEach(t => {
     const grpEvent = document.getElementById('grp-event');
     const grpTrack = document.getElementById('grp-track');
     const grpRider = document.getElementById('grp-rider');
-    const isYoY    = activeTab === 'yoy';
-    const isPoints = activeTab === 'points';
-    grpEvent.style.display = (isPoints || isYoY) ? 'none' : '';
+    const isYoY      = activeTab === 'yoy';
+    const isPoints   = activeTab === 'points';
+    const isRankings = activeTab === 'rankings';
+    grpEvent.style.display = (isPoints || isYoY || isRankings) ? 'none' : '';
     grpTrack.style.display = isYoY ? '' : 'none';
     grpRider.style.display = 'none';  // rider selector removed from YOY header
     renderActive();
@@ -719,6 +747,7 @@ function renderActive() {
   else if (activeTab === 'progression') renderProgressionChart();
   else if (activeTab === 'points')      renderPointsChart();
   else if (activeTab === 'yoy')         setYoYMode(yoyMode);
+  else if (activeTab === 'rankings')    renderRankings();
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -1465,6 +1494,217 @@ function renderYoYChart() {
 }
 
 selTrack.addEventListener('change', function() { setYoYMode(yoyMode); });
+
+// ── Rankings Tab ──────────────────────────────────────────────────────────────
+let rankingWindow = 'year';  // 'year' or '3yr'
+
+function _rankingYears(yearFilter, rollingN) {
+  const allYears = [...new Set(EVENTS.map(e => e.year))].sort((a, b) => a - b);
+  if (rollingN > 0) {
+    const withElim = allYears.filter(y =>
+      EVENTS.filter(e => e.year === y).some(e => LADDER[e.id] && Object.keys(LADDER[e.id].rounds || {}).length > 0)
+    );
+    return new Set(withElim.slice(-rollingN));
+  }
+  const yr = yearFilter ? +yearFilter : allYears[allYears.length - 1];
+  return new Set([yr]);
+}
+
+function computeELO(yearFilter, rollingN) {
+  const K = 32, DEFAULT_ELO = 1500;
+  const years = _rankingYears(yearFilter, rollingN);
+  const evList = EVENTS.filter(e => years.has(e.year)).sort((a, b) => a.id - b.id);
+
+  const eloMap = {}, winsMap = {}, lossesMap = {};
+  const ROUND_ORDER = ['E1', 'E2', 'E3', 'Final'];
+
+  for (const ev of evList) {
+    const ld = LADDER[ev.id];
+    if (!ld || !ld.rounds) continue;
+    for (const round of ROUND_ORDER) {
+      for (const m of (ld.rounds[round] || [])) {
+        if (!m.winner_lane) continue;
+        const wName = m[m.winner_lane.toLowerCase()].name;
+        const lName = m[m.winner_lane === 'LEFT' ? 'right' : 'left'].name;
+        if (!wName || !lName) continue;
+        if (!(wName in eloMap)) { eloMap[wName] = DEFAULT_ELO; winsMap[wName] = 0; lossesMap[wName] = 0; }
+        if (!(lName in eloMap)) { eloMap[lName] = DEFAULT_ELO; winsMap[lName] = 0; lossesMap[lName] = 0; }
+        const eW = 1 / (1 + Math.pow(10, (eloMap[lName] - eloMap[wName]) / 400));
+        eloMap[wName] += K * (1 - eW);
+        eloMap[lName] += K * (0 - (1 - eW));
+        winsMap[wName]++;
+        lossesMap[lName]++;
+      }
+    }
+  }
+
+  const result = new Map();
+  for (const name of Object.keys(eloMap)) {
+    result.set(name, { elo: eloMap[name], wins: winsMap[name] || 0, losses: lossesMap[name] || 0 });
+  }
+  return result;
+}
+
+function computePerfScores(yearFilter, rollingN) {
+  const years = _rankingYears(yearFilter, rollingN);
+  const evList = EVENTS.filter(e => years.has(e.year)).sort((a, b) => a.id - b.id);
+  const riderAcc = {};  // name → { totalPerf, count }
+
+  function mean(arr) { return arr.reduce((a, b) => a + b, 0) / arr.length; }
+  function fieldStats(vals) {
+    const v = vals.filter(x => x !== null);
+    if (v.length < 2) return null;
+    const mu = mean(v);
+    const sigma = Math.sqrt(v.reduce((a, x) => a + (x - mu) ** 2, 0) / v.length);
+    return sigma > 0 ? { mu, sigma } : null;
+  }
+
+  for (const ev of evList) {
+    const qd = QUALIFYING[ev.id];
+    if (!qd || !qd.riders) continue;
+
+    const metrics = {};
+    for (const [name, rd] of Object.entries(qd.riders)) {
+      const ets = [], rts = [], mphs = [], e60s = [];
+      for (const run of (rd.runs || [])) {
+        if (!run) continue;
+        const et  = run.et  != null ? parseFloat(run.et)  : NaN;
+        const rt  = run.rt  != null ? parseFloat(run.rt)  : NaN;
+        const mph = run.mph != null ? parseFloat(run.mph) : NaN;
+        const e60 = run.et_60 != null ? parseFloat(run.et_60) : NaN;
+        if (!isNaN(et)  && et  > 5.0) ets.push(et);
+        if (!isNaN(rt)  && rt  >= 0)  rts.push(rt);
+        if (!isNaN(mph) && mph > 0)   mphs.push(mph);
+        if (!isNaN(e60) && e60 > 0)   e60s.push(e60);
+      }
+      if (!ets.length && !mphs.length) continue;
+      metrics[name] = {
+        best_et: ets.length  ? Math.min(...ets)  : null,
+        avg_rt:  rts.length  ? mean(rts)          : null,
+        avg_mph: mphs.length ? mean(mphs)          : null,
+        avg_60:  e60s.length ? mean(e60s)          : null,
+      };
+    }
+
+    const names = Object.keys(metrics);
+    if (names.length < 2) continue;
+
+    const sET  = fieldStats(names.map(n => metrics[n].best_et));
+    const sRT  = fieldStats(names.map(n => metrics[n].avg_rt));
+    const sMPH = fieldStats(names.map(n => metrics[n].avg_mph));
+    const s60  = fieldStats(names.map(n => metrics[n].avg_60));
+
+    for (const [name, m] of Object.entries(metrics)) {
+      const zET  = (sET  && m.best_et !== null) ? -(m.best_et - sET.mu)  / sET.sigma  : 0;
+      const zRT  = (sRT  && m.avg_rt  !== null) ? -(m.avg_rt  - sRT.mu)  / sRT.sigma  : 0;
+      const zMPH = (sMPH && m.avg_mph !== null) ?  (m.avg_mph - sMPH.mu) / sMPH.sigma : 0;
+      const z60  = (s60  && m.avg_60  !== null) ? -(m.avg_60  - s60.mu)  / s60.sigma  : 0;
+      const perf = (s60 && m.avg_60 !== null)
+        ? 0.40 * zET + 0.25 * zRT + 0.15 * zMPH + 0.10 * z60
+        : 0.45 * zET + 0.28 * zRT + 0.27 * zMPH;
+      if (!(name in riderAcc)) riderAcc[name] = { totalPerf: 0, count: 0 };
+      riderAcc[name].totalPerf += perf;
+      riderAcc[name].count++;
+    }
+  }
+
+  const result = new Map();
+  for (const [name, acc] of Object.entries(riderAcc)) {
+    result.set(name, { perfScore: acc.count > 0 ? acc.totalPerf / acc.count : 0, eventsAttended: acc.count });
+  }
+  return result;
+}
+
+function renderRankings() {
+  const el = document.getElementById('tab-rankings');
+  const rollingN = rankingWindow === '3yr' ? 3 : rankingWindow === '5yr' ? 5 : 0;
+  const yr = selYear.value ? +selYear.value : null;
+
+  // Window label
+  let windowLabel;
+  if (rollingN > 0) {
+    const allYears = [...new Set(EVENTS.map(e => e.year))].sort((a, b) => a - b);
+    const withElim = allYears.filter(y =>
+      EVENTS.filter(e => e.year === y).some(e => LADDER[e.id] && Object.keys(LADDER[e.id].rounds || {}).length > 0)
+    );
+    const ry = withElim.slice(-rollingN);
+    windowLabel = ry.length >= 2 ? ry[0] + '–' + ry[ry.length - 1] + ' Rolling' : 'Rolling';
+  } else {
+    const allYears = [...new Set(EVENTS.map(e => e.year))].sort((a, b) => b - a);
+    windowLabel = (yr || allYears[0]) + ' Season';
+  }
+
+  const eloMap  = computeELO(yr, rollingN);
+  const perfMap = computePerfScores(yr, rollingN);
+  const allNames = new Set([...eloMap.keys(), ...perfMap.keys()]);
+
+  const rows = [];
+  for (const name of allNames) {
+    if (/\d/.test(name)) continue;  // skip data-error entries with numbers in name
+    const elo  = eloMap.get(name);
+    const perf = perfMap.get(name);
+    rows.push({
+      name,
+      elo:    elo  ? elo.elo    : 1500,
+      wins:   elo  ? elo.wins   : 0,
+      losses: elo  ? elo.losses : 0,
+      perfScore:     perf ? perf.perfScore     : 0,
+      eventsAttended: perf ? perf.eventsAttended : 0,
+    });
+  }
+
+  if (!rows.length) {
+    el.innerHTML = '<div class="no-data">No data available for the selected period.</div>';
+    return;
+  }
+
+  const eloVals  = rows.map(r => r.elo);
+  const perfVals = rows.map(r => r.perfScore);
+  const minELO = Math.min(...eloVals), maxELO = Math.max(...eloVals);
+  const minPerf = Math.min(...perfVals), maxPerf = Math.max(...perfVals);
+
+  for (const r of rows) {
+    r.eloNorm  = (maxELO  > minELO)  ? 100 * (r.elo       - minELO)  / (maxELO  - minELO)  : 50;
+    r.perfNorm = (maxPerf > minPerf)  ? 100 * (r.perfScore - minPerf) / (maxPerf - minPerf) : 50;
+    r.combined = 0.5 * r.eloNorm + 0.5 * r.perfNorm;
+  }
+  rows.sort((a, b) => b.combined - a.combined);
+
+  const btnYear = '<button class="toggle-btn' + (rankingWindow === 'year' ? ' active' : '') + '" onclick="rankingWindow=\'year\';renderRankings()">This Year</button>';
+  const btn3yr  = '<button class="toggle-btn' + (rankingWindow === '3yr'  ? ' active' : '') + '" onclick="rankingWindow=\'3yr\';renderRankings()">3-Year Rolling</button>';
+  const btn5yr  = '<button class="toggle-btn' + (rankingWindow === '5yr'  ? ' active' : '') + '" onclick="rankingWindow=\'5yr\';renderRankings()">5-Year Rolling</button>';
+
+  let html = '<div class="rnk-controls"><div class="toggle-group">' + btnYear + btn3yr + btn5yr + '</div>'
+           + '<span class="rnk-window-label">' + windowLabel + '</span></div>';
+
+  html += '<div class="tbl-wrap"><table class="rnk-table"><thead><tr>';
+  html += '<th>Rank</th><th>Rider</th><th class="num">ELO</th><th class="num">W-L</th>';
+  html += '<th class="num">Perf Score</th><th class="num">Combined</th><th class="num">Events</th>';
+  html += '</tr></thead><tbody>';
+
+  rows.forEach((r, i) => {
+    const rank = i + 1;
+    const rankCell = rank === 1 ? '<span class="rnk-badge rnk-badge-gold">1</span>'
+                   : rank === 2 ? '<span class="rnk-badge rnk-badge-silver">2</span>'
+                   : rank === 3 ? '<span class="rnk-badge rnk-badge-bronze">3</span>'
+                   : rank;
+    const eloBar  = '<div class="rnk-bar-wrap"><div class="rnk-bar elo-bar"  style="width:' + r.eloNorm.toFixed(0)  + '%"></div></div>';
+    const perfBar = '<div class="rnk-bar-wrap"><div class="rnk-bar perf-bar" style="width:' + r.perfNorm.toFixed(0) + '%"></div></div>';
+    const wl = (r.wins + r.losses > 0) ? r.wins + '-' + r.losses : '—';
+    html += '<tr>';
+    html += '<td class="num">' + rankCell + '</td>';
+    html += '<td>' + r.name + '</td>';
+    html += '<td class="num">' + Math.round(r.elo) + eloBar + '</td>';
+    html += '<td class="num rnk-win-pct">' + wl + '</td>';
+    html += '<td class="num">' + r.perfNorm.toFixed(1) + perfBar + '</td>';
+    html += '<td class="num"><strong>' + r.combined.toFixed(1) + '</strong></td>';
+    html += '<td class="num">' + (r.eventsAttended || '—') + '</td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
 
 // ── DB summary ────────────────────────────────────────────────────────────────
 const nYears  = new Set(EVENTS.map(e => e.year)).size;
